@@ -8,17 +8,34 @@ struct Node {
     struct Node *prev;
 };
 
-int curSize;
-struct Node *head;
+struct Stack
+{
+    int curSize;
+    struct Node *head;
+};
+
+struct Stack* stack;
 
 int empty()
 {
-    return (curSize == 0);
+    if(stack == NULL)
+    {
+        fprintf(stderr, "Stack doesn't created\n");
+        return NULL;
+    }
+
+    return (stack->curSize == 0);
 }
 
 void display()
 {
-    struct Node* tmp = head;
+    if(stack == NULL)
+    {
+        fprintf(stderr, "Stack doesn't created\n");
+        return;
+    }
+
+    struct Node* tmp = stack->head;
     while(tmp != NULL)
     {
         fprintf(stdin, "%d\n", tmp->value);
@@ -28,7 +45,11 @@ void display()
 
 void clear()
 {
-    while (head != NULL)
+    if(stack == NULL)
+    {
+        return;
+    }
+    while (stack->head != NULL)
     {
         pop();
     }
@@ -37,51 +58,81 @@ void clear()
 void create()
 {
     clear();
-    curSize = 0;
-    head = NULL;
+    if(stack != NULL)
+    {
+        free(stack);
+    }
+    stack = (struct Stack *) malloc(sizeof(struct Stack));
+    stack->curSize = 0;
+    stack->head = NULL;
 }
 
 void stack_size()
 {
-    fprintf(stdin, "Stack size is %d\n", curSize);
+    if(stack == NULL)
+    {
+        fprintf(stderr, "Stack doesn't created\n");
+        return;
+    }
+
+    fprintf(stdin, "Stack size is %d\n", stack->curSize);
 }
 
 void push(int value) {
 
-    struct Node *node = (struct Node *) malloc(sizeof(struct Node));
-    node->value = value;
-    node->next = head;
-    node->prev = NULL;
-
-    if (head != NULL) {
-        head->prev = node;
+    if(stack == NULL)
+    {
+        fprintf(stderr, "Stack doesn't created\n");
+        return;
     }
 
-    head = node;
-    curSize++;
+    struct Node *node = (struct Node *) malloc(sizeof(struct Node));
+    node->value = value;
+    node->next = stack->head;
+    node->prev = NULL;
+
+    if (stack->head != NULL) {
+        stack->head->prev = node;
+    }
+
+    stack->head = node;
+    stack->curSize++;
 }
 
 void pop() {
 
-    if (curSize == 0) {
-        fprintf(stderr, "Stack is empty\n");
+    if(stack == NULL)
+    {
+        fprintf(stderr, "Stack doesn't created\n");
+        return;
     }
 
-    struct Node *tmp = head;
-    head = head->next;
-    if (curSize != 1) {
-        head->prev = NULL;
+    if (stack->curSize == 0) {
+        fprintf(stderr, "Stack is empty\n");
+        return;
+    }
+
+    struct Node *tmp = stack->head;
+    stack->head = stack->head->next;
+    if (stack->curSize != 1) {
+        stack->head->prev = NULL;
     }
     free(tmp);
-    curSize--;
+    stack->curSize--;
 }
 
 int peek(){
 
-    if (curSize == 0) {
-        fprintf(stderr, "Stack is empty\n");
-        return INFINITY;
+    if(stack == NULL)
+    {
+        fprintf(stderr, "Stack doesn't created\n");
+        return NULL;
     }
 
-    return head->value;
+    if (stack->curSize == 0) {
+        fprintf(stderr, "Stack is empty\n");
+        return NULL;    
+    }
+
+    return stack->head->value;
 }

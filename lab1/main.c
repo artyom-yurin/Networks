@@ -194,7 +194,7 @@ int main() {
                 printf(">peek - return the value of top element on the stack\n");
                 printf(">empty - return 1 if the stack is empty, otherwise 0\n");
                 printf(">display - print all elements from top to bottom\n");
-                printf(">stack_size - print current size of the stack:\n");
+                printf(">stack_size - print current size of the stack\n");
                 printf(">quit - quit from application\n");
             } else if (strcmp(token, "quit\n") != 0) {
                 printf(">Unknown command. Use command help for look to commands list\n");

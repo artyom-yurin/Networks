@@ -4,6 +4,7 @@
 #include <signal.h>
 #include <malloc.h>
 #include <stdlib.h>
+#include <values.h>
 
 struct Node {
     int value;
@@ -20,8 +21,8 @@ struct Stack *stack;
 
 int empty() {
     if (stack == NULL) {
-        fprintf(stderr, "Stack doesn't created\n");
-        return NULL;
+        printf(">Stack doesn't created\n");
+        return INT_MAX;
     }
 
     return (stack->curSize == 0);
@@ -29,13 +30,18 @@ int empty() {
 
 void display() {
     if (stack == NULL) {
-        fprintf(stderr, "Stack doesn't created\n");
+        printf(">Stack doesn't created\n");
+        return;
+    }
+
+    if (stack->curSize == 0) {
+        printf(">Stack is empty\n");
         return;
     }
 
     struct Node *tmp = stack->head;
     while (tmp != NULL) {
-        fprintf(stdin, "%d\n", tmp->value);
+        printf(">%d\n", tmp->value);
         tmp = tmp->next;
     }
 }
@@ -44,12 +50,12 @@ void display() {
 void pop() {
 
     if (stack == NULL) {
-        fprintf(stderr, "Stack doesn't created\n");
+        printf(">Stack doesn't created\n");
         return;
     }
 
     if (stack->curSize == 0) {
-        fprintf(stderr, "Stack is empty\n");
+        printf(">Stack is empty\n");
         return;
     }
 
@@ -58,6 +64,7 @@ void pop() {
     if (stack->curSize != 1) {
         stack->head->prev = NULL;
     }
+    printf(">Poped %d from stack\n", tmp->value);
     free(tmp);
     stack->curSize--;
 }
@@ -66,6 +73,8 @@ void clear() {
     if (stack == NULL) {
         return;
     }
+
+    printf(">Clearing the stack\n");
     while (stack->head != NULL) {
         pop();
     }
@@ -83,17 +92,17 @@ void create() {
 
 void stack_size() {
     if (stack == NULL) {
-        fprintf(stderr, "Stack doesn't created\n");
+        printf(">Stack doesn't created\n");
         return;
     }
 
-    fprintf(stdin, "Stack size is %d\n", stack->curSize);
+    printf(">Stack size is %d\n", stack->curSize);
 }
 
 void push(int value) {
 
     if (stack == NULL) {
-        fprintf(stderr, "Stack doesn't created\n");
+        printf(">Stack doesn't created\n");
         return;
     }
 
@@ -108,18 +117,20 @@ void push(int value) {
 
     stack->head = node;
     stack->curSize++;
+
+    printf(">Pushed %d\n", value);
 }
 
 int peek() {
 
     if (stack == NULL) {
-        fprintf(stderr, "Stack doesn't created\n");
-        return NULL;
+        printf(">Stack doesn't created\n");
+        return INT_MAX;
     }
 
     if (stack->curSize == 0) {
-        fprintf(stderr, "Stack is empty\n");
-        return NULL;
+        printf(">Stack is empty\n");
+        return INT_MAX;
     }
 
     return stack->head->value;
@@ -130,11 +141,12 @@ int main() {
     int fds[2];
     pipe(fds);
 
+
     if (fork() == 0) //child
     {
         while (strcmp(buffer, "quit\n") != 0) {
             close(fds[0]);
-            printf("Enter command: ");
+            printf("\nEnter command: ");
             fgets(buffer, 1024, stdin);
             write(fds[1], buffer, 1024);
             kill(getpid(), SIGSTOP);
@@ -148,31 +160,44 @@ int main() {
             if (strcmp(token, "push") == 0) {
                 token = strtok(NULL, "\n");
                 int number = atoi(token);
-                printf("Push %d\n", number);
+                push(number);
             } else if (strcmp(token, "peek\n") == 0) {
-                printf("Peek\n");
+                int i = peek();
+                if(i != INT_MAX)
+                {
+                    printf(">Stack top value is %d\n", i);
+                }
             } else if (strcmp(token, "pop\n") == 0) {
-                printf("pop\n");
+                pop();
             } else if (strcmp(token, "empty\n") == 0) {
-                printf("empty\n");
+                if(empty() != INT_MAX)
+                {
+                    if(empty())
+                    {
+                        printf(">The stack is empty\n");
+                    } else {
+                        printf(">The stack isn't empty\n");
+                    }
+                }
             } else if (strcmp(token, "display\n") == 0) {
-                printf("display\n");
+                display();
             } else if (strcmp(token, "create\n") == 0) {
-                printf("create\n");
+                create();
+                printf(">The stack has been created\n");
             } else if (strcmp(token, "stack_size\n") == 0) {
-                printf("stack_size\n");
+                stack_size();
             } else if (strcmp(token, "help\n") == 0) {
-                printf("Commands:\n");
-                printf("create - create a stack\n");
-                printf("push *value* - push some integer value to the stack\n");
-                printf("pop - pop last element from the stack\n");
-                printf("peek - return the value of top element on the stack\n");
-                printf("empty - return 1 if the stack is empty, otherwise 0\n");
-                printf("display - print all elements from top to bottom\n");
-                printf("stack_size - print current size of the stack:\n");
-                printf("quit - quit from application\n");
+                printf(">Commands:\n");
+                printf(">create - create a stack\n");
+                printf(">push *value* - push some integer value to the stack\n");
+                printf(">pop - pop last element from the stack\n");
+                printf(">peek - return the value of top element on the stack\n");
+                printf(">empty - return 1 if the stack is empty, otherwise 0\n");
+                printf(">display - print all elements from top to bottom\n");
+                printf(">stack_size - print current size of the stack:\n");
+                printf(">quit - quit from application\n");
             } else if (strcmp(token, "quit\n") != 0) {
-                printf("Unknown command. Use command help for look to commands list\n");
+                printf(">Unknown command. Use command help for look to commands list\n");
             }
             kill(0, SIGCONT);
         }

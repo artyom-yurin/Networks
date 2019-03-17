@@ -277,6 +277,20 @@ void setup_tcp_communication(char *ip, int port, char *name) {
             for(int i = 0; i < result.count; i++)
             {
                 printf("%d %s:%d\n", (i+1), result.addresses[i].ip, result.addresses[i].port);
+                int est = 0;
+                for(int k = 0; k < node1.count; k++)
+                {
+                    if(strcmp(result.addresses[i].ip, node1.addresses[k].ip) == 0)
+                    {
+                        est = 1;
+                    }
+                }
+                if (!est && node1.count < 10)
+                {
+                    strcpy(node1.addresses[node1.count].ip, result.addresses[i].ip);
+                    node1.addresses[node1.count].port = 8080;
+                    node1.count++;
+                }
             }
         }
 
@@ -285,7 +299,7 @@ void setup_tcp_communication(char *ip, int port, char *name) {
 
 int main(int argc, char **argv) {
     node1.count = 1;
-    strcpy(node1.addresses[0].ip, "188.130.155.151");
+    strcpy(node1.addresses[0].ip, "10.240.21.23");
     node1.addresses[0].port = 8080;
 
     pthread_t thread_id;
